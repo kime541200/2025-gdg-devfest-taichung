@@ -1,0 +1,40 @@
+services:
+  local-spark:
+    init: true
+    image: local-spark:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: local-spark
+    environment:
+      FLOW_CONFIG: "/config/config.yaml"
+    ipc: host
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - 5411:5412
+    env_file:
+      - .env
+    volumes:
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+      - type: bind
+        source: ./config
+        target: /config
+      - type: bind
+        source: src/
+        target: /app
+    working_dir: /app
+    command: uvicorn local_spark.server:app --host 0.0.0.0 --port 5412
+    restart: always
+    healthcheck:
+      test: "curl -f http://localhost:5412/health || exit 1"
+      interval: 30s
+      timeout: 10s
+      retries: 3

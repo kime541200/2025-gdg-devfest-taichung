@@ -1,0 +1,25 @@
+# 排除版本控制目錄
+.git
+.gitignore
+
+# 排除 Python 快取與編譯檔
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# 排除本地虛擬環境
+venv
+env
+
+# 排除 build 與發行產物
+build
+dist
+*.egg-info
+
+# 排除臨時與日誌檔
+*.log
+*.tmp
+tmp/
+todo/
+.vscode/

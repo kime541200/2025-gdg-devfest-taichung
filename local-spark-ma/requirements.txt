@@ -1,0 +1,19 @@
+# Common
+pydantic
+pydantic_settings
+rich
+pyyaml
+python-dotenv
+
+# LLM
+openai
+
+# Agent
+openai-agents
+
+# API
+uvicorn
+fastapi
+
+# serial port
+pyserial

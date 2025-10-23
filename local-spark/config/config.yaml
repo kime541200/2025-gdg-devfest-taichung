@@ -1,0 +1,17 @@
+flow_schema:
+  system:
+    verbose: True
+  
+  agent_brains:
+    - brain_type: main
+      max_turn: 30
+      llm_config:
+        base_url: http://host.docker.internal:15412/v1
+        model: gemma-3-27b-it-UD-Q2_K_XL
+
+  mcp_server_configs:
+    - transport: streamable-http
+      streamable_http_config:
+        params: 
+          url: http://host.docker.internal:2000/mcp
+        name: arduino-mcp-server

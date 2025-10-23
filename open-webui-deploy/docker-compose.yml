@@ -1,0 +1,16 @@
+services:
+  owui:
+    image: ghcr.io/open-webui/open-webui:slim
+    container_name: owui
+    restart: always
+    init: true
+    ports:
+      - "9910:8080"
+    volumes:
+      - owui:/app/backend/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  owui:
+    name: owui

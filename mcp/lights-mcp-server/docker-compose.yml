@@ -1,0 +1,21 @@
+services:
+  lights-mcp-server:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: lights-mcp-server:latest
+    container_name: lights-mcp-server
+    privileged: true # Give extended privileges to this container, needed for serial port access.
+    devices:
+      - "/dev/ttyACM0:/dev/ttyACM0" # Mount the host's serial port into the container.
+    ipc: host
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "2000:2828"
+    volumes:
+      - type: bind
+        source: ./
+        target: /app
+    restart: always
+    command: ["python", "-m", "src.server", "--host", "0.0.0.0", "--port", "2828"]
