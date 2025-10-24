@@ -1,4 +1,4 @@
-import traceback, argparse, uvicorn
+import traceback, argparse, uvicorn, os
 from mcp.server.fastmcp import FastMCP
 import serial, time, logging
 import serial.tools.list_ports
@@ -11,41 +11,78 @@ logger = logging.getLogger(__name__)
 mcp = FastMCP("Auduino MCP Server")
 
 def _find_arduino_port():
+    """
+    自動尋找 Arduino 連接埠
+    在 Linux 上尋找 ttyACM*，在 macOS 上尋找 cu.usbmodem*
+    """
     ports = serial.tools.list_ports.comports()
     for port in ports:
-        # Look for common Arduino identifiers
+        # Linux: ttyACM0, ttyACM1, etc.
         if "ttyACM" in port.device:
+            return port.device
+        # macOS: cu.usbmodem*, cu.usbserial*, etc.
+        if "cu.usbmodem" in port.device or "cu.usbserial" in port.device:
             return port.device
     return None
 
 led_count = 3
 BAUD_RATE = 9600
-PORT = _find_arduino_port()
 
-if PORT is None:
-    logger.error(
-        "No Arduino device found. Please ensure your Arduino is connected "
-        "and the necessary drivers are installed."
-    )
-    exit()
+# 支援兩種連接模式：
+# 1. 直接連接串口（Linux 或 macOS host 直接運行）
+# 2. 通過 TCP 連接（macOS + Docker，使用 socat 轉發）
+USE_TCP = os.getenv("SERIAL_USE_TCP", "false").lower() == "true"
+TCP_HOST = os.getenv("SERIAL_TCP_HOST", "host.docker.internal")
+TCP_PORT = int(os.getenv("SERIAL_TCP_PORT", "5555"))
 
-try:
-    ser = serial.Serial(PORT, BAUD_RATE, timeout=1)
-    # 等待 2 秒，讓 Arduino 完成重置並準備就緒
-    time.sleep(2) 
-    # 讀取 Arduino 啟動時發送的 "Arduino Ready." 訊息，清空緩衝區
-    initial_message = ser.readline().decode('utf-8').strip()
-    logger.info(f"Connect to Arduino({PORT}) success: {initial_message}")
+if USE_TCP:
+    # 使用 TCP 連接模式（適用於 macOS + Docker）
+    try:
+        logger.info(f"Connecting to Arduino via TCP: {TCP_HOST}:{TCP_PORT}")
+        # 使用 socket:// URL 來建立 TCP 連接
+        ser = serial.serial_for_url(f"socket://{TCP_HOST}:{TCP_PORT}", timeout=1)
+        time.sleep(2)
+        initial_message = ser.readline().decode('utf-8').strip()
+        logger.info(f"Connect to Arduino via TCP success: {initial_message}")
+    except Exception as e:
+        logger.error(
+            f"Connect to Arduino via TCP ({TCP_HOST}:{TCP_PORT}) error.\n"
+            f"Please make sure:\n"
+            f"> socat is running on your host machine\n"
+            f"> Command: socat TCP-LISTEN:{TCP_PORT},reuseaddr,fork /dev/cu.usbmodem*,raw,echo=0\n"
+            f"Detail error log:\n"
+            f"{e}"
+        )
+        exit()
+else:
+    # 使用直接串口連接模式（適用於 Linux + Docker 或 host 直接運行）
+    PORT = os.getenv("SERIAL_PORT") or _find_arduino_port()
+    
+    if PORT is None:
+        logger.error(
+            "No Arduino device found. Please ensure your Arduino is connected "
+            "and the necessary drivers are installed."
+        )
+        exit()
 
-except serial.SerialException as e:
-    logger.error(
-        f"Connect to Arduino({PORT}) error, please check:\n"
-        f"> Did Ardiuno connect to your computer?\n"
-        f"> Is the port name `{PORT}` correct?\n"
-        f"Detail error log:\n"
-        f"{e}"
-    )
-    exit()
+    try:
+        logger.info(f"Connecting to Arduino via serial port: {PORT}")
+        ser = serial.Serial(PORT, BAUD_RATE, timeout=1)
+        # 等待 2 秒，讓 Arduino 完成重置並準備就緒
+        time.sleep(2) 
+        # 讀取 Arduino 啟動時發送的 "Arduino Ready." 訊息，清空緩衝區
+        initial_message = ser.readline().decode('utf-8').strip()
+        logger.info(f"Connect to Arduino({PORT}) success: {initial_message}")
+
+    except serial.SerialException as e:
+        logger.error(
+            f"Connect to Arduino({PORT}) error, please check:\n"
+            f"> Did Arduino connect to your computer?\n"
+            f"> Is the port name `{PORT}` correct?\n"
+            f"Detail error log:\n"
+            f"{e}"
+        )
+        exit()
 
 
 @mcp.tool(name="get_lights_statuses", description="Get information of all lights, or a specific light if ID is provided.")

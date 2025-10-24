@@ -17,13 +17,16 @@
 .
 ├── .dockerignore
 ├── .gitignore
-├── docker-compose.yml
+├── docker-compose.yml         # Linux 系統用的 Docker Compose 配置
+├── docker-compose.macos.yml   # macOS 系統用的 Docker Compose 配置
 ├── Dockerfile
 ├── requirements.txt
+├── start-macos.sh             # macOS 自動啟動腳本
+├── stop-macos.sh              # macOS 停止腳本
 └── src/
-    ├── server.py             # MCP 伺服器核心邏輯
+    ├── server.py              # MCP 伺服器核心邏輯（支援串口和 TCP 連接）
     └── models/
-        └── auduino.py        # Pydantic 模型定義，用於資料驗證和序列化
+        └── auduino.py         # Pydantic 模型定義，用於資料驗證和序列化
 ```
 
 ## 設定與運行
@@ -36,28 +39,103 @@
 
 ### Docker Compose 部署
 
-使用 Docker Compose 可以輕鬆地部署和運行此 MCP 伺服器。
+使用 Docker Compose 可以輕鬆地部署和運行此 MCP 伺服器。根據你的作業系統，需要使用不同的配置方式：
 
-1.  **配置序列埠**：
-    在 `docker-compose.yml` 中，確保 `devices` 部分正確指向你的 Arduino 序列埠。例如：
-    ```yaml
-    devices:
-      - "/dev/ttyACM0:/dev/ttyACM0" # 將主機的序列埠掛載到容器中
+#### Linux 系統
+
+在 Linux 系統上，可以直接將 USB 裝置掛載到容器內。
+
+1.  **確認序列埠**：
+    先確認你的 Arduino 連接的序列埠：
+    ```bash
+    ls /dev/ttyACM*
     ```
-    你可能需要根據你的系統調整 `/dev/ttyACM0`。
+    通常會顯示 `/dev/ttyACM0`。
 
-2.  **構建並啟動服務**：
-    在 `mcp/lights-mcp-server/` 目錄下運行以下命令：
+2.  **使用預設的 docker-compose.yml**：
+    在 `mcp/lights-mcp-server/` 目錄下運行：
     ```bash
     docker-compose up --build -d
     ```
 
 3.  **檢查日誌**：
-    你可以使用以下命令查看伺服器的日誌，確認是否成功連接到 Arduino：
     ```bash
     docker-compose logs -f lights-mcp-server
     ```
     如果連接成功，你應該會看到類似 `Connect to Arduino(/dev/ttyACM0) success: Arduino Ready.` 的訊息。
+
+#### macOS 系統
+
+在 macOS 上，由於 Docker Desktop 的架構限制，無法直接將 USB 裝置掛載到容器內。需要使用 **socat** 進行網路轉發。
+
+##### 方法一：使用自動化腳本（推薦）
+
+我們提供了自動化腳本來簡化啟動流程：
+
+1.  **安裝 socat**：
+    ```bash
+    brew install socat
+    ```
+
+2.  **連接 Arduino 並執行啟動腳本**：
+    ```bash
+    cd mcp/lights-mcp-server/
+    ./start-macos.sh
+    ```
+    腳本會自動：
+    - 檢測 Arduino 裝置
+    - 啟動 socat 轉發
+    - 啟動 Docker 容器
+    - 顯示連接狀態
+
+3.  **停止服務**：
+    ```bash
+    ./stop-macos.sh
+    ```
+
+##### 方法二：手動啟動
+
+1.  **安裝 socat**：
+    ```bash
+    brew install socat
+    ```
+
+2.  **找到你的 Arduino 序列埠**：
+    ```bash
+    ls /dev/cu.usbmodem*
+    ```
+    例如可能顯示 `/dev/cu.usbmodem3101`。
+
+3.  **啟動 socat 轉發**：
+    在一個終端視窗中執行（保持該視窗開啟）：
+    ```bash
+    # 請將 /dev/cu.usbmodem3101 替換成你的實際裝置路徑
+    socat TCP-LISTEN:5555,reuseaddr,fork /dev/cu.usbmodem3101,raw,echo=0
+    ```
+    這個命令會將序列埠的資料轉發到本機的 5555 埠。
+
+4.  **使用 macOS 專用的 docker-compose 檔案**：
+    在另一個終端視窗中，於 `mcp/lights-mcp-server/` 目錄下運行：
+    ```bash
+    docker-compose -f docker-compose.macos.yml up --build -d
+    ```
+
+5.  **檢查日誌**：
+    ```bash
+    docker-compose -f docker-compose.macos.yml logs -f lights-mcp-server
+    ```
+    如果連接成功，你應該會看到類似 `Connecting to Arduino via TCP: host.docker.internal:5555` 和 `Connect to Arduino via TCP success: Arduino Ready.` 的訊息。
+
+6.  **停止服務**：
+    ```bash
+    docker-compose -f docker-compose.macos.yml down
+    pkill -f "socat.*5555"
+    ```
+
+**注意事項**：
+- socat 轉發程式必須持續運行，關閉後容器將無法與 Arduino 通訊。
+- 如果更換 USB 埠或重新插拔 Arduino，需要重新啟動 socat 命令。
+- 你可以將 socat 命令寫成腳本或使用 `launchd` 設為開機自動啟動。
 
 ### 直接運行 (非 Docker)
 

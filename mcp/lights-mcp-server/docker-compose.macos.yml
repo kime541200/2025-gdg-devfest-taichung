@@ -1,0 +1,24 @@
+services:
+  lights-mcp-server:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: lights-mcp-server:latest
+    container_name: lights-mcp-server
+    ipc: host
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      # 使用 TCP 模式連接序列埠（通過 socat 轉發）
+      - SERIAL_USE_TCP=true
+      - SERIAL_TCP_HOST=host.docker.internal
+      - SERIAL_TCP_PORT=5555
+    ports:
+      - "2000:2828"
+    volumes:
+      - type: bind
+        source: ./
+        target: /app
+    restart: always
+    command: ["python", "-m", "src.server", "--host", "0.0.0.0", "--port", "2828"]
+
