@@ -17,7 +17,7 @@
 
 > You will need [Docker](https://www.docker.com/get-started/) and [docker-compose](https://github.com/docker/compose) installed.
 
-1. Go to [unsloth/gemma-3-27b-it-GGUF](https://huggingface.co/unsloth/gemma-3-27b-it-GGUF) and choose a GGUF model which can fit in your device.
+1. Go to [unsloth/gemma-3-27b-it-qat](https://huggingface.co/unsloth/gemma-3-27b-it-qat) and choose a GGUF model which can fit in your device.
 2. Put the GGUF file into [model folder](./llamacpp-deploy/model/)
 3. Copy [.env.example](./llamacpp-deploy/.env.example) to `.env`
 4. Set the `MODEL_FILENAME` to the name of the GGUF file
