@@ -1,19 +1,19 @@
-這是一個全地端的 Agent 系統專案倉庫（for 2025 GDG DevFest Taichung）
+> This repo is for 2025 GDG DevFest Taichung
 
 # Implement the Live Demo
 
 ## Prepare
 
-### 1. Arduino
+### 🛠️ 1. Arduino
 
 1. [Download & install Arduino IDE](https://docs.arduino.cc/software/ide/)
 2. Connect Arduino UNO to computer
 3. Write the code in [here](code/arduino_code/led_serial_port_control/led_serial_port_control.ino) into Arduino
 4. Set the LEDs and resistors as this: ![circuit](./assets/circuit.png)
 
-### 2. Local LLM
+### 🧠 2. Local LLM
 
-#### Using the device with CUDA support
+#### 🚀 Using the device with CUDA support
 
 > You will need [Docker](https://www.docker.com/get-started/) and [docker-compose](https://github.com/docker/compose) installed.
 
@@ -32,19 +32,19 @@
     ```
 6. After the server start, you can find the inference engine running on `http://localhost:15412/v1`.
 
-#### Using macOS device
+#### 🍎 Using macOS device
 
 Please refer to [here](./llamacpp-deploy/Build%20llama%20cpp%20on%20macOS%20from%20scratch.md) to build llama.cpp from source.
 
 And use the same command as the [docker-compose.yml](./llamacpp-deploy/docker-compose.yml) to start the inference engine.
 
-### 3. Local MCP Server
+### 🔌 3. Local MCP Server
 
 > **Platform Support**: This MCP server currently supports **Linux** and **macOS** only.
 
 > Make sure the Arduino you set up in the [previous step](#1-arduino) is connected.
 
-#### For Linux Users
+#### 🐧 For Linux Users
 
 1. Go to [here](./mcp/lights-mcp-server/)
 2. Use the command to start the MCP server:
@@ -54,7 +54,7 @@ And use the same command as the [docker-compose.yml](./llamacpp-deploy/docker-co
 
 > The MCP server will automatically find the device named `ttyACM`. If your Arduino has a different name, please modify the [code](./mcp/lights-mcp-server/src/server.py).
 
-#### For macOS Users
+#### 🍏 For macOS Users
 
 Due to Docker Desktop's architecture limitations on macOS, USB devices cannot be directly mounted to containers. We provide helper scripts to handle this:
 
@@ -74,7 +74,7 @@ Due to Docker Desktop's architecture limitations on macOS, USB devices cannot be
 
 > The startup script will automatically detect your Arduino device and set up TCP forwarding. For more details about the technical implementation, please refer to [PLATFORM_SUPPORT.md](./mcp/lights-mcp-server/PLATFORM_SUPPORT.md).
 
-### 4. Open-WebUI
+### 🌐 4. Open-WebUI
 
 1. Go to [here](./open-webui-deploy/)
 2. Use the command to start Open-WebUI:
@@ -85,9 +85,9 @@ Due to Docker Desktop's architecture limitations on macOS, USB devices cannot be
 
 ---
 
-## Funny part
+## 🎉 Funny part
 
-### Single Agent Demo
+### 🤖 Single Agent Demo
 
 1. Go to [here](./local-spark/)
 2. Start the server:
@@ -108,3 +108,12 @@ Due to Docker Desktop's architecture limitations on macOS, USB devices cannot be
 3. (Optional) If you want to see the agent trace log, please copy [`.env.example`](./local-spark-ma/.env.example) to `.env` and set your OpenAI API key.
 4. Go to Open-WebUI, add the connection `http://localhost:5412/v1`.
 5. Now you can see `LOCAL-SPARK-MA` in the model list and you can start play with it.
+
+---
+
+## 📚 Further Reading and Resources
+
+- [ai-agents-for-beginners](https://github.com/microsoft/ai-agents-for-beginners)
+- [mcp-for-beginners](https://github.com/microsoft/mcp-for-beginners)
+- [Deep Dive into LLMs like ChatGPT](https://youtu.be/7xTGNNLPyMI)
+- [Context Engineering for AI Agents with LangChain and Manus](https://youtu.be/6_BcCthVvb8)
