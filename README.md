@@ -1,4 +1,6 @@
 > This repo is for 2025 GDG DevFest Taichung
+> 
+> Test on Ubuntu24.04, i5-11400, 32GB DDR4, RTX 4060 Ti
 
 # Implement the Live Demo
 
@@ -8,7 +10,7 @@
 
 1. [Download & install Arduino IDE](https://docs.arduino.cc/software/ide/)
 2. Connect Arduino UNO to computer
-3. Write the code in [here](code/arduino_code/led_serial_port_control/led_serial_port_control.ino) into Arduino
+3. Write the code in [here](./arduino_code/led_serial_port_control/led_serial_port_control.ino) into Arduino
 4. Set the LEDs and resistors as this: ![circuit](./assets/circuit.png)
 
 ### 🧠 2. Local LLM
@@ -16,6 +18,13 @@
 #### 🚀 Using the device with CUDA support
 
 > You will need [Docker](https://www.docker.com/get-started/) and [docker-compose](https://github.com/docker/compose) installed.
+>
+> Use this command to make sure your Docker can see GPU:  
+> ```bash
+> docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi
+> ```
+> 
+> [Installing the NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
 
 1. Go to [unsloth/gemma-3-27b-it-qat](https://huggingface.co/unsloth/gemma-3-27b-it-qat) and choose a GGUF model which can fit in your device.
 2. Put the GGUF file into [model folder](./llamacpp-deploy/model/)
@@ -37,6 +46,21 @@
 Please refer to [here](./llamacpp-deploy/Build%20llama%20cpp%20on%20macOS%20from%20scratch.md) to build llama.cpp from source.
 
 And use the same command as the [docker-compose.yml](./llamacpp-deploy/docker-compose.yml) to start the inference engine.
+If you prefer running without Docker on macOS (recommended for stability with Metal), launch the server directly after build:
+
+```bash
+# Example: run OpenAI-compatible server with Metal, expose on 15412
+/path/to/llama.cpp/build/bin/llama-server \
+  -m /absolute/path/to/model/your.gguf \
+  --host 0.0.0.0 --port 15412 --jinja --ngl 99 \
+  -c 16384 --threads $(sysctl -n hw.ncpu)
+```
+
+Then verify:
+```bash
+curl -fsS http://localhost:15412/health
+curl -fsS http://localhost:15412/v1/models | jq .
+```
 
 ### 🔌 3. Local MCP Server
 
@@ -88,6 +112,7 @@ Due to Docker Desktop's architecture limitations on macOS, USB devices cannot be
 ## 🎉 Funny part
 
 ### 🤖 Single Agent Demo
+> Prerequisites: make sure the Local LLM (15412) and MCP server (2000) are running.`.
 
 1. Go to [here](./local-spark/)
 2. Start the server:
@@ -95,10 +120,11 @@ Due to Docker Desktop's architecture limitations on macOS, USB devices cannot be
     docker-compose up -d
     ```
 3. (Optional) If you want to see the agent trace log, please copy [`.env.example`](./local-spark/.env.example) to `.env` and set your OpenAI API key.
-4. Go to Open-WebUI, add the connection `http://localhost:5411/v1`.
+4. Go to Open-WebUI, add the connection `http://localhost:5411/v1` with OpenAI-Compatible, and you can set API key to whatever.
 5. Now you can see `LOCAL-SPARK` in the model list and you can start play with it.
 
-### Multi Agent Demo
+### 🧑‍🤝‍🧑 Multi Agent Demo
+> Prerequisites: make sure the Local LLM (15412) and MCP server (2000) are running.`.
 
 1. Go to [here](./local-spark-ma/)
 2. Start the server:
@@ -106,7 +132,7 @@ Due to Docker Desktop's architecture limitations on macOS, USB devices cannot be
     docker-compose up -d
     ```
 3. (Optional) If you want to see the agent trace log, please copy [`.env.example`](./local-spark-ma/.env.example) to `.env` and set your OpenAI API key.
-4. Go to Open-WebUI, add the connection `http://localhost:5412/v1`.
+4. Go to Open-WebUI, add the connection `http://localhost:5412/v1` with OpenAI-Compatible, and you can set API key to whatever.
 5. Now you can see `LOCAL-SPARK-MA` in the model list and you can start play with it.
 
 ---
