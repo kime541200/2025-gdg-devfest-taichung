@@ -1,0 +1,79 @@
+# Python caches and builds
+*.py[cod]
+*.pyd
+*.egg-info/
+build/
+dist/
+.mypy_cache/
+.pytest_cache/
+.tox/
+.ruff_cache/
+
+# Coverage
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Environments
+.venv/
+venv/
+env/
+.env
+.python-version
+
+# Logs and caches
+*.log
+logs/
+.cache/
+
+# OS / IDE
+.DS_Store
+.idea/
+
+# Llama.cpp models (keep placeholder)
+llamacpp-deploy/model/*
+!llamacpp-deploy/model/put_llm_here
+
+# Arduino build artifacts (if any)
+*.hex
+
+# Python caches and builds
+*.py[cod]
+*.pyd
+*.egg-info/
+build/
+dist/
+.mypy_cache/
+.pytest_cache/
+.tox/
+.ruff_cache/
+
+# Coverage
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Environments
+venv/
+env/
+.env.*
+.python-version
+
+# Logs and caches
+*.log
+logs/
+.cache/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Llama.cpp models (keep placeholder)
+llamacpp-deploy/model/*
+!llamacpp-deploy/model/put_llm_here
+
+# Arduino build artifacts (if any)
+*.hex

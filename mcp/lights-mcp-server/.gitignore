@@ -1,0 +1,33 @@
+# Python bytecode 與快取
+__pycache__/
+*.py[cod]
+
+# 虛擬環境
+env/
+venv/
+.venv/
+
+# Build 與發行產物
+build/
+dist/
+*.egg-info/
+
+# 編輯器設定
+.vscode/
+.idea/
+
+# OS 產生的檔案
+.DS_Store
+Thumbs.db
+
+# 日誌、臨時檔
+*.log
+*.tmp
+tmp/
+
+# 環境配置檔（儘量另行管理敏感信息）
+.env
+
+# 其他無關文件
+assets/avatars/
+todo/

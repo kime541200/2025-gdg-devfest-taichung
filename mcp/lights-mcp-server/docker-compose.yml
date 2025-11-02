@@ -1,0 +1,29 @@
+# Docker Compose 配置檔案 - Linux 系統
+# 適用於可以直接掛載 USB 裝置到容器的環境
+# macOS 用戶請使用 docker-compose.macos.yml
+
+services:
+  lights-mcp-server:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: lights-mcp-server:latest
+    container_name: lights-mcp-server
+    privileged: true # Give extended privileges to this container, needed for serial port access.
+    devices:
+      - "/dev/ttyACM0:/dev/ttyACM0" # Mount the host's serial port into the container.
+    environment:
+      # 使用直接串口連接模式（Linux 預設）
+      - SERIAL_USE_TCP=false
+      - SERIAL_PORT=/dev/ttyACM0
+    ipc: host
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "2000:2828"
+    volumes:
+      - type: bind
+        source: ./
+        target: /app
+    restart: always
+    command: ["python", "-m", "src.server", "--host", "0.0.0.0", "--port", "2828"]

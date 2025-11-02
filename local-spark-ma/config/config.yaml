@@ -1,0 +1,52 @@
+flow_schema:
+  system:
+    verbose: True
+  
+  loop_constrain:
+    max_iteration: 10
+
+  agent_brains:
+    - brain_type: main
+      llm_config:
+        base_url: http://host.docker.internal:15412/v1
+        model: gemma-3-27b-it-UD-Q2_K_XL
+    - brain_type: fast
+      llm_config:
+        base_url: http://host.docker.internal:15412/v1
+        model: gemma-3-27b-it-UD-Q2_K_XL
+    - brain_type: think
+      llm_config:
+        base_url: http://host.docker.internal:15412/v1
+        model: gemma-3-27b-it-UD-Q2_K_XL
+
+  mcp_server_configs:
+    - transport: streamable-http
+      streamable_http_config:
+        params: 
+          url: http://host.docker.internal:2000/mcp
+        name: get_status
+        tool_filter_config:
+          allowed_tool_names:
+            - get_lights_statuses
+            - get_light_count
+          blocked_tool_names:
+            - set_light_brightness
+            - turn_on_light
+            - turn_off_light
+            - blink_light
+        client_session_timeout_seconds: 20
+    - transport: streamable-http
+      streamable_http_config:
+        params: 
+          url: http://host.docker.internal:2000/mcp
+        name: set_light
+        tool_filter_config:
+          allowed_tool_names:
+            - set_light_brightness
+            - turn_on_light
+            - turn_off_light
+            - blink_light
+          blocked_tool_names:
+            - get_lights_statuses
+            - get_light_count
+        client_session_timeout_seconds: 20
