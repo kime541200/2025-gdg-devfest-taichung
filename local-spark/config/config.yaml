@@ -15,3 +15,4 @@ flow_schema:
         params: 
           url: http://host.docker.internal:2000/mcp
         name: arduino-mcp-server
+        client_session_timeout_seconds: 30

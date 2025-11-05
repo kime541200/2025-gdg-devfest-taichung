@@ -34,7 +34,7 @@ flow_schema:
             - turn_on_light
             - turn_off_light
             - blink_light
-        client_session_timeout_seconds: 20
+        client_session_timeout_seconds: 60
     - transport: streamable-http
       streamable_http_config:
         params: 
@@ -49,4 +49,4 @@ flow_schema:
           blocked_tool_names:
             - get_lights_statuses
             - get_light_count
-        client_session_timeout_seconds: 20
+        client_session_timeout_seconds: 60
